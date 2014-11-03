@@ -72,6 +72,11 @@ public class ProcessPacketController extends KeyAdapter
     packetView.setToggle(Toggles.SHOW_DEPTH_VIEW,show);
   }
   
+  public void show3DView(boolean show) {
+//    packetView.setToggle(Toggles.SHOW_3D,show);
+    packetView.show3DView(show);
+  }
+  
   public void keyPressed(KeyEvent ke) {
     switch (ke.getKeyCode()) {
     case KeyEvent.VK_B:

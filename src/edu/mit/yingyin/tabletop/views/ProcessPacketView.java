@@ -215,12 +215,13 @@ public class ProcessPacketView {
     debugView.showDebugImage(packet);
     debugView.showStatusMessage("hand pose class: " + classLabel);
 
-    if (toggleMap.get(Toggles.SHOW_DEPTH_VIEW))
+    if (toggleMap.get(Toggles.SHOW_DEPTH_VIEW)) {
       depthView.showDebugImage(packet);
+    }
     
-    if (toggleMap.get(Toggles.SHOW_3D))
+    if (toggleMap.get(Toggles.SHOW_3D)) {
       showTable3DFrame(packet);
-    
+    } 
   }
 
   public Rectangle getBounds() {
@@ -277,6 +278,14 @@ public class ProcessPacketView {
 
   public void setToggle(Toggles name, boolean status) {
     toggleMap.put(name, status);
+  }
+
+  
+  public void show3DView(boolean show) {
+    this.setToggle(Toggles.SHOW_3D,show);
+    if (table3DView != null) {
+      table3DView.setVisible(show);
+    }
   }
 
   public BufferedImage depthImage() { return depthView.image(); }
