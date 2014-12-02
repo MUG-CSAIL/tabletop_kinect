@@ -55,6 +55,17 @@ public class Background {
     return instance;
   }
   
+  public static Background resetInstance() {
+    if (instance == null) {
+      LOGGER.warning("Instance has been initialized. Cannot initialize again");
+    }   
+    int width = instance.width;
+    int height = instance.height; 
+    instance.release();
+    instance = new Background(width, height);
+    return instance;
+  }
+  
   public static Background instance() {
     if (instance == null) {
       LOGGER.severe("Instance is not initialized!");

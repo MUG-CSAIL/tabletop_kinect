@@ -38,7 +38,7 @@ public class HandTrackingEngine {
   private HandTracker tracker;
   private ForelimbFeatureDetector featureDetector;
   
-  private int depthFrameIDOffset, lastDepthFrameID;
+  private int depthFrameIDOffset;
 
   /**
    * Creates a new <code>HandTrackingEngine</code>.
@@ -67,8 +67,8 @@ public class HandTrackingEngine {
   }
   
   public int getDepthFrameID() {
-    this.currentDepthFrameID = openni.getDepthFrameID() - this.depthFrameIDOffset;
-    return this.currentDepthFrameID;
+    this.currentDepthFrameID = openni.getDepthFrameID();
+    return this.currentDepthFrameID - this.depthFrameIDOffset;
   }
 
   public int depthWidth() {
@@ -116,7 +116,7 @@ public class HandTrackingEngine {
       openni.getDepthArray(packet.depthRawData);
       prevDepthFrameID = currentDepthFrameID;
       packet.depthFrameID = this.getDepthFrameID();
-      currentDepthFrameID = packet.depthFrameID;
+      //currentDepthFrameID = packet.depthFrameID;
 
       featureDetector.detect(packet);
 

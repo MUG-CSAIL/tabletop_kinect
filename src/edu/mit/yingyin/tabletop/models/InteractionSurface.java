@@ -73,6 +73,10 @@ public class InteractionSurface {
     return instance;
   }
   
+  public static void clearInstancve() {
+    instance = null;
+  }
+  
   public static InteractionSurface instance() {
     if (instance == null) {
       logger.severe("Instance is not initialized. You need to call " +

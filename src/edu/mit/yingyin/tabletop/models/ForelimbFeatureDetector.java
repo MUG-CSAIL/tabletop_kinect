@@ -91,7 +91,7 @@ public class ForelimbFeatureDetector {
 
   private static final int FORELIMB_BOTTOM_TO_IMAGE_BOTTOM_DIST_THRESH = 10;
   
-  private final Background background;
+  private Background background;
   private final IplImage tempImage;
   private final ForelimbModelEstimator forelimbModelEstimator;
   private final OpenNIDevice openni;
@@ -123,6 +123,9 @@ public class ForelimbFeatureDetector {
    */
   public void detect(ProcessPacket packet) throws StatusException {
     packet.clear();
+    
+    lastDepthFrameID = packet.depthFrameID;
+
 
     if (packet.depthFrameID < BG_INGNORE_FRAMES)
       return;
@@ -151,7 +154,6 @@ public class ForelimbFeatureDetector {
     hpfd.detect(packet);
     forelimbModelEstimator.updateModel(packet);
     
-    lastDepthFrameID = packet.depthFrameID;
   }
 
   /**
@@ -164,6 +166,9 @@ public class ForelimbFeatureDetector {
   }
   
   public void recalibrateBackground() {
+    background = Background.resetInstance();
+    InteractionSurface.clearInstancve();
+    LOGGER.info("Background recalibrating.");
   }
   
   /**
