@@ -97,6 +97,8 @@ public class ForelimbFeatureDetector {
   private final OpenNIDevice openni;
   private final HandFeatureDetector hpfd;
   
+  private int lastDepthFrameID;
+  
   /**
    * Initializes the data structures.
    * 
@@ -110,6 +112,7 @@ public class ForelimbFeatureDetector {
     forelimbModelEstimator = new ForelimbModelEstimator(width, height, openni);
     this.openni = openni;
     hpfd = new HandFeatureDetector(width, height, openni);
+    lastDepthFrameID = 0;
   }
 
   /**
@@ -147,6 +150,8 @@ public class ForelimbFeatureDetector {
     findHandRegions(packet);
     hpfd.detect(packet);
     forelimbModelEstimator.updateModel(packet);
+    
+    lastDepthFrameID = packet.depthFrameID;
   }
 
   /**
@@ -157,6 +162,18 @@ public class ForelimbFeatureDetector {
     background.release();
     LOGGER.info("HandAnalyzer released.");
   }
+  
+  public void recalibrateBackground() {
+  }
+  
+  /**
+   * Returns true whenever recording frames to subtract from the background.
+   * @return
+   */
+  public boolean isCalibratingBackground() {
+    return lastDepthFrameID < BG_INIT_FRAMES;
+  }
+  
 
   protected void subtractBackground(ProcessPacket packet) {
     int[] depthData = packet.depthRawData;

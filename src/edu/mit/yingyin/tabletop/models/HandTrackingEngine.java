@@ -37,6 +37,8 @@ public class HandTrackingEngine {
   private int prevDepthFrameID = -1, currentDepthFrameID = -1;
   private HandTracker tracker;
   private ForelimbFeatureDetector featureDetector;
+  
+  private int depthFrameIDOffset, lastDepthFrameID;
 
   /**
    * Creates a new <code>HandTrackingEngine</code>.
@@ -56,6 +58,17 @@ public class HandTrackingEngine {
         new ForelimbFeatureDetector(depthWidth, depthHeight, openni);
 
     tracker = new HandTracker(new CalibModel(calibrationFile), openni);
+    
+    this.depthFrameIDOffset = 0;
+  }
+  
+  public void resetDepthFrameID() {
+    this.depthFrameIDOffset = this.currentDepthFrameID;
+  }
+  
+  public int getDepthFrameID() {
+    this.currentDepthFrameID = openni.getDepthFrameID() - this.depthFrameIDOffset;
+    return this.currentDepthFrameID;
   }
 
   public int depthWidth() {
@@ -102,7 +115,7 @@ public class HandTrackingEngine {
       packet = new ProcessPacket(depthWidth, depthHeight, openni);
       openni.getDepthArray(packet.depthRawData);
       prevDepthFrameID = currentDepthFrameID;
-      packet.depthFrameID = openni.getDepthFrameID();
+      packet.depthFrameID = this.getDepthFrameID();
       currentDepthFrameID = packet.depthFrameID;
 
       featureDetector.detect(packet);
@@ -115,6 +128,22 @@ public class HandTrackingEngine {
       System.exit(-1);
     }
     return packet;
+  }
+  
+  /**
+   * Resets the background calibration of the tabletop.
+   */
+  public void recalibrateBackground() {
+    this.resetDepthFrameID();
+    featureDetector.recalibrateBackground();
+  }
+  
+  /**
+   * Returns true whenever recording frames to subtract from the background.
+   * @return
+   */
+  public boolean isCalibratingBackground() {
+    return featureDetector.isCalibratingBackground();
   }
 
   public boolean interactionSurfaceInitialized() {
