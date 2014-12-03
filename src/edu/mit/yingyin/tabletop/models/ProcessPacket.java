@@ -70,6 +70,10 @@ public class ProcessPacket {
   public int[] depthRawData;
   public IplImage depthImage8U, depthImage32F, derivative, morphedImage, 
          depthImageBlur32F;
+  // depthImage8U hold background subtracted image.
+  // morphedImage holds the opened image (removes outliers).
+  // depthImage32F holds depthRawData scaled from 0 to 1.
+  // depthImageBlur32F holds depthRawData in float form.
   public IplImage foregroundMask;
   public CvMemStorage tempMem;
   public List<ForelimbFeatures> forelimbFeatures = 

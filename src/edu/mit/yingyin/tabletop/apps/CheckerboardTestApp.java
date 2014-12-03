@@ -88,6 +88,11 @@ public class CheckerboardTestApp {
           engine.depthHeight(), null);
       engine.addHandEventListener(heController);
       packetController.addKeyListener(new KeyController());
+      
+      // Configure depth debug views
+      packetController.showDepthImage(true);
+      packetController.show3DView(true);
+
     } catch (GeneralException ge) {
       logger.severe(ge.getMessage());
       System.exit(-1);
@@ -99,7 +104,7 @@ public class CheckerboardTestApp {
   
   public void showUI() {
     heController.showUI();
-    packetController.showDepthImage(false);
+    //packetController.showDepthImage(false);
   }
   
   public void start() {

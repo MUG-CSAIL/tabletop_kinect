@@ -303,7 +303,7 @@ public class ProcessPacketView {
 
   private void initToggles() {
     toggleMap.put(Toggles.SHOW_DEPTH_VIEW, true);
-    toggleMap.put(Toggles.SHOW_3D, false);
+    toggleMap.put(Toggles.SHOW_3D, true);
     toggleMap.put(Toggles.SHOW_CONVEXITY_DEFECTS, false);
     toggleMap.put(Toggles.SHOW_HULL, false);
     toggleMap.put(Toggles.SHOW_MORPHED, true);
