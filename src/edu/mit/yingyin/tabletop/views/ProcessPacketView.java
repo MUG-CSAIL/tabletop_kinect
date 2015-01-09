@@ -2,6 +2,7 @@ package edu.mit.yingyin.tabletop.views;
 
 import static com.googlecode.javacv.cpp.opencv_core.IPL_DEPTH_8U;
 import static com.googlecode.javacv.cpp.opencv_core.cvCircle;
+import static com.googlecode.javacv.cpp.opencv_core.cvLine;
 import static com.googlecode.javacv.cpp.opencv_core.cvRectangle;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_GRAY2BGR;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
@@ -26,6 +27,7 @@ import org.OpenNI.GeneralException;
 import org.OpenNI.Point3D;
 
 import com.googlecode.javacv.CanvasFrame;
+import com.googlecode.javacv.cpp.opencv_core.CvLineIterator;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
@@ -33,6 +35,7 @@ import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
 import edu.mit.yingyin.tabletop.controllers.ViewImageValueController;
 import edu.mit.yingyin.tabletop.models.EnvConstant;
+import edu.mit.yingyin.tabletop.models.Forelimb;
 import edu.mit.yingyin.tabletop.models.HistogramImageComponent;
 import edu.mit.yingyin.tabletop.models.InteractionSurface;
 import edu.mit.yingyin.tabletop.models.ProcessPacket;
@@ -303,7 +306,7 @@ public class ProcessPacketView {
 
   private void initToggles() {
     toggleMap.put(Toggles.SHOW_DEPTH_VIEW, true);
-    toggleMap.put(Toggles.SHOW_3D, true);
+    toggleMap.put(Toggles.SHOW_3D, false);
     toggleMap.put(Toggles.SHOW_CONVEXITY_DEFECTS, false);
     toggleMap.put(Toggles.SHOW_HULL, false);
     toggleMap.put(Toggles.SHOW_MORPHED, true);
@@ -337,16 +340,23 @@ public class ProcessPacketView {
     for (ForelimbFeatures ff : packet.forelimbFeatures) {
       if (toggleMap.get(Toggles.SHOW_BOUNDING_BOX)) {
         CvRect rect = ff.boundingBox;
-        cvRectangle(analysisImage, new CvPoint(rect.x(), rect.y()),
-                    new CvPoint(rect.x() + rect.width() - 1, 
-                                rect.y() + rect.height() - 1),
-                    CvScalar.WHITE, 1, 8, 0);
+//        cvRectangle(analysisImage, new CvPoint(rect.x(), rect.y()),
+//                    new CvPoint(rect.x() + rect.width() - 1, 
+//                                rect.y() + rect.height() - 1),
+//                    CvScalar.WHITE, 1, 8, 0);
         rect = ff.handRegion;
         if (rect != null) {
           cvRectangle(analysisImage, new CvPoint(rect.x(), rect.y()),
                       new CvPoint(rect.x() + rect.width() - 1, 
                           rect.y() + rect.height() - 1),
-                      CvScalar.WHITE, 1, 8, 0);
+                      CvScalar.RED, 1, 8, 0);
+        }
+        rect = ff.armJointRegion;
+        if (rect != null) {
+          cvRectangle(analysisImage, new CvPoint(rect.x(), rect.y()),
+                      new CvPoint(rect.x() + rect.width() - 1, 
+                          rect.y() + rect.height() - 1),
+                      CvScalar.BLUE, 1, 8, 0);
         }
       }
 
@@ -365,6 +375,28 @@ public class ProcessPacketView {
           Point3f p = vcp.value;
           cvCircle(analysisImage, new CvPoint((int) p.x, (int) p.y), 4,
               CvScalar.GREEN, -1, 8, 0);
+        }
+      }
+      
+      // Draw armjjoint
+      if (!packet.forelimbs.isEmpty()) {
+        Forelimb forlimb = packet.forelimbs.get(0);
+        Point3f armjoint = forlimb.armJointI();
+        if (armjoint != null) {
+          cvCircle(analysisImage, new CvPoint((int) armjoint.x, (int) armjoint.y), 4,
+              CvScalar.CYAN, -1, 8, 0);
+        
+          // Draw line between armjoint and finger tips
+          Point3f fingertipAverage = new Point3f();
+          for (Point3f p : forlimb.fingertipsI()) {
+            fingertipAverage.add(p);
+          }
+          
+          fingertipAverage.scale((float) 1 / forlimb.fingertipsI().size());
+          cvLine(analysisImage, 
+              new CvPoint((int) fingertipAverage.x, (int) fingertipAverage.y),
+              new CvPoint((int) armjoint.x, (int)armjoint.y),
+              CvScalar.RED, 2, 8, 0);
         }
       }
     }
