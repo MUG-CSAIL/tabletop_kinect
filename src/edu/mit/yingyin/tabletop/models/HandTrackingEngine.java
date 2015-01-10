@@ -39,6 +39,12 @@ public class HandTrackingEngine {
   private ForelimbFeatureDetector featureDetector;
   
   private int depthFrameIDOffset;
+  
+  /**
+   * Helper for debugging purposes. Flips the depth image when using 
+   * Kinect connected to Linux machine.
+   */
+  private static final boolean FLIP_DEPTH_BASED_ON_OS = true;
 
   /**
    * Creates a new <code>HandTrackingEngine</code>.
@@ -118,6 +124,12 @@ public class HandTrackingEngine {
       packet.depthFrameID = this.getDepthFrameID();
       //currentDepthFrameID = packet.depthFrameID;
 
+      if (FLIP_DEPTH_BASED_ON_OS) {
+        if (System.getProperty("os.name").equals("Linux")) {
+          flipPacketDepth(packet);
+        }
+      }
+      
       featureDetector.detect(packet);
 
       if (interactionSurfaceInitialized())
@@ -128,6 +140,33 @@ public class HandTrackingEngine {
       System.exit(-1);
     }
     return packet;
+  }
+  
+  /**
+   * Flips the depth array of a ProcessPacket
+   * @param packet
+   */
+  public void flipPacketDepth(ProcessPacket packet) {
+    int[] depthArray = packet.depthRawData;
+    
+//    int[] tempRow = new int[packet.width];
+//    
+//    for (int h = 0; h < packet.height/2; h++) {
+//      int srcPos1 = h * packet.width;
+//      int srcPos2 = depthArray.length - (h + 1) * packet.width;
+//      System.arraycopy(depthArray, srcPos1, tempRow, 0, packet.width);
+//      System.arraycopy(depthArray, srcPos2, depthArray, srcPos1, packet.width);
+//      System.arraycopy(tempRow, 0, depthArray, srcPos2, packet.width);
+//    }
+    
+    int temp, ii;
+    for(int i = 0; i < depthArray.length/2; ++i) {
+      ii = depthArray.length - i - 1;
+      temp = depthArray[i];
+      depthArray[i] = depthArray[ii];
+      depthArray[ii] = temp;
+    }
+    
   }
   
   /**

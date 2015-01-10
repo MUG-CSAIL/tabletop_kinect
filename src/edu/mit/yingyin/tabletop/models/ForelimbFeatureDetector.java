@@ -87,9 +87,11 @@ public class ForelimbFeatureDetector {
    * hand. The minimum hand height is assumed to be 8cm. 
    */
   private static final int HAND_MIN_HEIGHT_SCALE = 11;
-  private static final int ARM_JOINT_HEIGHT_SCALE = 20;
+  private static final int ARM_JOINT_HEIGHT_SCALE = 7;
 
   private static final int FORELIMB_BOTTOM_TO_IMAGE_BOTTOM_DIST_THRESH = 10;
+  
+  private static final boolean HAND_ORIENTATION_UP_FROM_BOTTOM = true;
   
   private Background background;
   private final IplImage tempImage;
@@ -272,22 +274,45 @@ public class ForelimbFeatureDetector {
     int minHandHeight = packet.height / HAND_MIN_HEIGHT_SCALE;
     int armJointHeight = packet.height / ARM_JOINT_HEIGHT_SCALE;
 
-    for (ForelimbFeatures ff : packet.forelimbFeatures) {
-      CvRect rect = ff.boundingBox;
-      if (rect.height() < maxHandHeight)
-        maxHandHeight = rect.height();
-      if (rect.height() >= minHandHeight) {
-        int y1 = rect.y();
-        int y2 = y1 + rect.height();
-        int yhand = y1, yarm = y2 - armJointHeight;
-        if (!isForelimbAtBottom(y2, packet.height)) {
-          yhand = y2 - maxHandHeight;
-          yarm = y1;
+    if (HAND_ORIENTATION_UP_FROM_BOTTOM) {
+      for (ForelimbFeatures ff : packet.forelimbFeatures) {
+        CvRect rect = ff.boundingBox;
+        if (rect.height() < maxHandHeight) {
+          maxHandHeight = rect.height();
         }
-        ff.handRegion = cvRect(rect.x(), yhand, rect.width(), maxHandHeight);
-        if (rect.height() - maxHandHeight >= armJointHeight) {
-          ff.armJointRegion =
-              cvRect(rect.x(), yarm, rect.width(), armJointHeight);
+        if (rect.height() >= minHandHeight) {
+          int y1 = rect.y();
+          int y2 = y1 + rect.height();
+          
+          int yhand = y1, yarm = y2 - armJointHeight;
+          ff.handRegion = cvRect(rect.x(), yhand, rect.width(), maxHandHeight);
+          
+          if (rect.height() - maxHandHeight >= armJointHeight) {
+            ff.armJointRegion =
+                cvRect(rect.x(), yarm, rect.width(), armJointHeight);
+          }
+        }
+      }
+      
+    } else {
+      
+      for (ForelimbFeatures ff : packet.forelimbFeatures) {
+        CvRect rect = ff.boundingBox;
+        if (rect.height() < maxHandHeight)
+          maxHandHeight = rect.height();
+        if (rect.height() >= minHandHeight) {
+          int y1 = rect.y();
+          int y2 = y1 + rect.height();
+          int yhand = y1, yarm = y2 - armJointHeight;
+          if (!isForelimbAtBottom(y2, packet.height)) {
+            yhand = y2 - maxHandHeight;
+            yarm = y1;
+          }
+          ff.handRegion = cvRect(rect.x(), yhand, rect.width(), maxHandHeight);
+          if (rect.height() - maxHandHeight >= armJointHeight) {
+            ff.armJointRegion =
+                cvRect(rect.x(), yarm, rect.width(), armJointHeight);
+          }
         }
       }
     }

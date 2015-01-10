@@ -61,6 +61,20 @@ public class DisplayImageFrame extends KeyAdapter
         g2d.fillOval(pointInImageCoord.x - OVAL_WIDTH / 2, 
             pointInImageCoord.y - OVAL_WIDTH / 2, OVAL_WIDTH, OVAL_WIDTH);
       }
+      
+      if (de != null) {
+        g2d.setColor(Color.orange);
+        Point2f[] points = de.pointingLocationsD();
+        for (Point2f point : points) {
+          Point2f p = scale(point);
+          Point pointInImageCoord = new Point((int) p.x, (int) p.y);
+          SwingUtilities.convertPointFromScreen(pointInImageCoord, this);
+          g2d.drawOval(pointInImageCoord.x - OVAL_WIDTH / 2, 
+              pointInImageCoord.y - OVAL_WIDTH / 2, OVAL_WIDTH, OVAL_WIDTH);
+          g2d.fillOval(pointInImageCoord.x - OVAL_WIDTH / 2, 
+              pointInImageCoord.y - OVAL_WIDTH / 2, OVAL_WIDTH, OVAL_WIDTH);
+        }
+      }
     }
     
     private Point2f scale(Point2f p) {
@@ -71,6 +85,7 @@ public class DisplayImageFrame extends KeyAdapter
   }
   
   private List<ManipulativeEvent> feList;
+  private DiecticEvent de;
   private CalibFrame frame;
   private final Dimension tabletopRes;
   
@@ -94,7 +109,6 @@ public class DisplayImageFrame extends KeyAdapter
   @Override
   public void fingerPressed(List<ManipulativeEvent> feList) {
     this.feList = feList;
-    frame.repaint();
   }
   
   @Override
@@ -131,8 +145,8 @@ public class DisplayImageFrame extends KeyAdapter
 
   @Override
   public void fingerPointed(DiecticEvent de) {
-    // TODO Auto-generated method stub
-    
+    this.de = de;
+    frame.repaint();
   }
 }
 

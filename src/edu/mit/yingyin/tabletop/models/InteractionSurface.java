@@ -250,6 +250,11 @@ public class InteractionSurface {
     surfaceNormal = new Vector3f();
     surfaceNormal.cross(v1, v2);
     center = Geometry.midpoint(closestPoints.get(0), closestPoints.get(1));
+    
+    //Todo(KoolJBlack): Remove this test
+    surfaceNormal = new Vector3f(0, 0, 1);
+    center = new Point3f(0,0, -1070);
+    
     logger.info("center: " + center);
     logger.info("surface normal: " + surfaceNormal);
   }
