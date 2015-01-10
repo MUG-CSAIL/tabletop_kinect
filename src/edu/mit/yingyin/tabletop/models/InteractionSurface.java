@@ -252,8 +252,10 @@ public class InteractionSurface {
     center = Geometry.midpoint(closestPoints.get(0), closestPoints.get(1));
     
     //Todo(KoolJBlack): Remove this test
-    surfaceNormal = new Vector3f(0, 0, 1);
-    center = new Point3f(0,0, -1070);
+    if (System.getProperty("os.name").equals("Linux")) {
+      surfaceNormal = new Vector3f(0, 0, 1);
+      center = new Point3f(0,0, -1070);
+    }
     
     logger.info("center: " + center);
     logger.info("surface normal: " + surfaceNormal);
