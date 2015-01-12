@@ -7,6 +7,7 @@ import javax.vecmath.Point3f;
 
 import org.OpenNI.Point3D;
 
+import edu.mit.yingyin.util.FilteredPoint3fs;
 import edu.mit.yingyin.util.Geometry;
 
 /**
@@ -16,6 +17,14 @@ import edu.mit.yingyin.util.Geometry;
  *
  */
 public class DiecticGestureHandler {
+  
+  private int FILTER_HISTORY_LENGTH = 5;
+  private FilteredPoint3fs filteredFingertip, filteredArmjoint;
+  
+  public DiecticGestureHandler() {
+    filteredFingertip = new FilteredPoint3fs(FILTER_HISTORY_LENGTH);
+    filteredArmjoint = new FilteredPoint3fs(FILTER_HISTORY_LENGTH);
+  }
   
   /**
    * @param forelimbs
@@ -47,16 +56,25 @@ public class DiecticGestureHandler {
       return null;
     
     Point3f fingertip = new Point3f();
-    for (Point3f p : fl.fingertipsW())
+    for (Point3f p : fl.fingertipsW()) {
       fingertip.add(p);
+    }
     fingertip.scale((float) 1 / fl.fingertipsW().size());
     
     Point3f armJoint = fl.armJointW();
-    if (armJoint == null)
+    if (armJoint == null) {
       return null;
+    }
     
-    if (is.center().isNone())
+    if (is.center().isNone()) {
       return null;
+    }
+    
+    // Filtering
+    filteredFingertip.updatePoints(new Point3f[] {fingertip});
+    filteredArmjoint.updatePoints(new Point3f[] {armJoint});
+    fingertip = filteredFingertip.getFilteredPoints()[0];
+    armJoint = filteredArmjoint.getFilteredPoints()[0];
     
     Point3f p = Geometry.linePlaneIntersection(armJoint, fingertip, 
         is.center().value(), is.surfaceNormal());
