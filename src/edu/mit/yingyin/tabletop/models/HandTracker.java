@@ -120,14 +120,14 @@ public class HandTracker {
    * @param forelimbs information for all the forelimbs detected.
    * @param frameID frame ID for the current update.
    */
-  public void update(List<Forelimb> forelimbs, int frameID) {
+  public void update(List<Forelimb> forelimbs, int frameID, ProcessPacket packet) {
     List<ManipulativeEvent> fingerEventList = noFilter(forelimbs, frameID);
     if (fingerEventList != null && !fingerEventList.isEmpty()) {
       for (IHandEventListener l : listeners) 
         l.fingerPressed(fingerEventList);
     }
     try {
-      List<Point3D> intersections = dgh.update(forelimbs);
+      List<Point3D> intersections = dgh.update(forelimbs, packet);
       int size = intersections.size();
       Point3D[] intersectionsW = new Point3D[size];
       intersections.toArray(intersectionsW);

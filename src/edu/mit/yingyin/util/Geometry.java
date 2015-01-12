@@ -291,5 +291,14 @@ public class Geometry {
     v.sub(point, pointOnPlane);
     return normal.dot(v) / normal.length();
   }
+  
+  public static Point3f interpolate(Point3f p1, Point3f p2, float amount) {
+    Vector3f v1 = new Vector3f(p1);
+    Vector3f v2 = new Vector3f(p2);
+    Vector3f v3 = new Vector3f();
+    v2.sub(v1);
+    v3.scaleAdd(amount, v2, v1 );
+    return new Point3f(v3);
+  }
 }
 

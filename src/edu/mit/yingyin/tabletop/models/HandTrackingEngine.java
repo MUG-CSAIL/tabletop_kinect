@@ -133,7 +133,7 @@ public class HandTrackingEngine {
       featureDetector.detect(packet);
 
       if (interactionSurfaceInitialized())
-        tracker.update(packet.forelimbs, packet.depthFrameID);
+        tracker.update(packet.forelimbs, packet.depthFrameID, packet);
     } catch (Exception e) {
       logger.severe(e.getMessage());
       e.printStackTrace();
