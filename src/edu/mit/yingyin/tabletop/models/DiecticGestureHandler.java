@@ -5,6 +5,7 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.CV_DIST_L2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvFitLine;
 
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
+import com.googlecode.javacv.cpp.opencv_core.CvRect;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public class DiecticGestureHandler {
    * Must be at least 2.
    */
   private final int NUM_ARM_SUBSAMPLE_POINTS = 5; 
+  
+  private final int RECT_RADIUS = 3;
   
   
   public DiecticGestureHandler(OpenNIDevice openni) {
@@ -158,30 +161,24 @@ public class DiecticGestureHandler {
     pointMat.put((NUM_ARM_SUBSAMPLE_POINTS+1) * 3 + 2, armJoint.getZ());
   
     for (int i = 1; i < points.length - 1; ++i) {
-      // Get z point from interpolation first, then use z point from depthRaw
-      // only if it's part of the foreground.
-      float z = points[i].getZ();
-      if ((maskBuffer.get((int) points[i].getY() * maskStepWidth
-          + (int) points[i].getX()) & 0xff) == 255) {
-        z = packet.getDepthRaw((int)points[i].getX(), (int)points[i].getY());
-      }
       
-      // Convert point back to real world
-      Point3f p = new Point3f();
       try {
-        p.set(points[i].getX(), points[i].getY(), z);
-        p = openni.convertProjectiveToRealWorld(p);
+        Point3f p = findCentroid(packet, points[i]);
+        if (p != null) {
+          pointMat.put(i * 3, p.getX());
+          pointMat.put(i * 3 + 1, p.getY());
+          pointMat.put(i * 3 + 2, p.getZ());
+        } else {
+          p = points[i];
+          p = openni.convertProjectiveToRealWorld(p);
+          pointMat.put(i * 3, p.getX());
+          pointMat.put(i * 3 + 1, p.getY());
+          pointMat.put(i * 3 + 2, p.getZ());
+        }
       } catch (StatusException e) {
         LOGGER.severe(e.getMessage());
       }    
- 
-      pointMat.put(i * 3, p.getX());
-      pointMat.put(i * 3 + 1, p.getY());
-      pointMat.put(i * 3 + 2, p.getZ());
       
-//      pointMat.put(i * 3, points[i].getX());
-//      pointMat.put(i * 3 + 1, points[i].getY());
-//      pointMat.put(i * 3 + 2, z);
     }
     
     // Fit line
@@ -197,5 +194,48 @@ public class DiecticGestureHandler {
     subsampledLinePoints[1].add(subsampledLinePoints[0]);
     
     return subsampledLinePoints;
+  }
+  
+  /**
+   * Finds the centroid of points in a rectangular region around a point.
+   */
+  private Point3f findCentroid(ProcessPacket packet, Point3f centerPoint) 
+      throws StatusException {
+
+    CvRect rect = new CvRect((int)centerPoint.x - RECT_RADIUS, (int)centerPoint.y
+        - RECT_RADIUS, RECT_RADIUS * 2 + 1, RECT_RADIUS * 2 + 1);
+
+    ByteBuffer maskBuffer = packet.foregroundMask.getByteBuffer();
+    int maskStepWidth = packet.foregroundMask.widthStep();
+    List<Point3D> list = new ArrayList<Point3D>();
+    
+    for (int y = rect.y(); y < rect.y() + rect.height(); y++) {
+      for (int x = rect.x(); x < rect.x() + rect.width(); x++) {
+        if ((maskBuffer.get(y * maskStepWidth + x) & 0xff) == 255) {
+          list.add(new Point3D(x, y,
+              packet.depthRawData[y * packet.width + x]));
+        }
+      }
+    }
+    
+    
+    if (list.size() == 0) {
+      return null;
+    }
+
+    Point3D[] points = new Point3D[list.size()];
+    list.toArray(points);
+    Point3D[] converted = openni.convertProjectiveToRealWorld(points);
+    float centerx = 0, centery = 0, centerz = 0;
+    for (Point3D point : converted) {
+      centerx += point.getX();
+      centery += point.getY();
+      centerz += point.getZ();
+    }
+    
+    Point3f res = new Point3f(centerx / list.size(), centery / list.size(), centerz
+        / list.size());
+
+    return res;
   }
 }
