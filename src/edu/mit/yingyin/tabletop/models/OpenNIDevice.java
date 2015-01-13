@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Logger;
 
+import javax.vecmath.Point3f;
+
 import org.OpenNI.Context;
 import org.OpenNI.DepthGenerator;
 import org.OpenNI.DepthMetaData;
@@ -222,6 +224,20 @@ public class OpenNIDevice {
       throws StatusException {
     Point3D worldP = new Point3D(p.getX(), p.getY(), -p.getZ());
     return depthGen.convertRealWorldToProjective(worldP);
+  }
+  
+  public Point3f convertRealWorldToProjective(Point3f p)
+      throws StatusException {
+    Point3D worldP = new Point3D(p.getX(), p.getY(), -p.getZ());
+    Point3D projectedP = depthGen.convertRealWorldToProjective(worldP);
+    return new Point3f(projectedP.getX(), projectedP.getY(), projectedP.getZ());
+  }
+  
+  public Point3f convertProjectiveToRealWorld(Point3f p)
+      throws StatusException {
+    Point3D projectedP = new Point3D(p.getX(), p.getY(), p.getZ());
+    Point3D worldP = depthGen.convertProjectiveToRealWorld(projectedP);
+    return new Point3f(worldP.getX(), worldP.getY(), -worldP.getZ());
   }
   
   private void init() throws GeneralException {
