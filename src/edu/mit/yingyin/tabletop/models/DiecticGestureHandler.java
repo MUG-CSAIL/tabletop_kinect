@@ -37,15 +37,15 @@ public class DiecticGestureHandler {
   /**
    * Number of points to use for filter smoothing.
    */
-  private final int FILTER_HISTORY_LENGTH = 5;
+  private final int FILTER_HISTORY_LENGTH = 15;
   private FilteredPoint3fs filteredFingertip, filteredArmjoint;
   
   /**
    * Must be at least 2.
    */
-  private final int NUM_ARM_SUBSAMPLE_POINTS = 5; 
+  private final int NUM_ARM_SUBSAMPLE_POINTS = 10; 
   
-  private final int RECT_RADIUS = 3;
+  private final int RECT_RADIUS = 5;
   
   
   public DiecticGestureHandler(OpenNIDevice openni) {
