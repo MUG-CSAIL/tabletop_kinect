@@ -37,7 +37,7 @@ public class DiecticGestureHandler {
   /**
    * Number of points to use for filter smoothing.
    */
-  private final int FILTER_HISTORY_LENGTH = 15;
+  private final int FILTER_HISTORY_LENGTH = 2;
   private FilteredPoint3fs filteredFingertip, filteredArmjoint;
   
   /**
