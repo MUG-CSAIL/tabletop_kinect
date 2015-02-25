@@ -41,6 +41,12 @@ public class DiecticGestureHandler {
   private FilteredPoint3fs filteredFingertip, filteredArmjoint;
   
   /**
+   * Right arm adjustment
+   */
+  private final boolean RIGHT_ARM_ADJUSTMENT = true;
+  private final float RIGHT_ARM_ADJUSTMENT_RATIO = 0.2f;
+  
+  /**
    * Must be at least 2.
    */
   private final int NUM_ARM_SUBSAMPLE_POINTS = 10; 
@@ -103,6 +109,13 @@ public class DiecticGestureHandler {
     filteredArmjoint.updatePoints(new Point3f[] {armJoint});
     fingertip = filteredFingertip.getFilteredPoints()[0];
     armJoint = filteredArmjoint.getFilteredPoints()[0];
+    
+    if (RIGHT_ARM_ADJUSTMENT) {
+      float xdiff = (fingertip.x - armJoint.x);
+      float ydiff = (fingertip.y - armJoint.y);
+      float armLength = (float) Math.sqrt( xdiff * xdiff + ydiff * ydiff);
+      armJoint.x -= RIGHT_ARM_ADJUSTMENT_RATIO * armLength;
+    }
     
     // Find the subsampeled arm line.
     Point3f subsampledLinePoints[] = computeSubsampledLine(fingertip, armJoint, packet);
