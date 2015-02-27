@@ -45,7 +45,7 @@ public class DiecticGestureHandler {
    * Right arm adjustment
    */
   private final boolean RIGHT_ARM_ADJUSTMENT = true;
-  private final float RIGHT_ARM_ADJUSTMENT_ANGLE_DEGREES = 10;
+  private final float RIGHT_ARM_ADJUSTMENT_ANGLE_DEGREES = -20;
   
   /**
    * Must be at least 2.
