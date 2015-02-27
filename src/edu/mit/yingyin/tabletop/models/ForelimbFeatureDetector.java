@@ -81,13 +81,13 @@ public class ForelimbFeatureDetector {
    * The ratio between the height of the table and the maximum (fully extended)
    * height of the hand. 
    */
-  private static final int HAND_MAX_HEIGHT_SCALE = 8;
+  private static final int HAND_MAX_HEIGHT_SCALE = 10;
   /**
    * The ratio between the height of the table and the minimum height of the
    * hand. The minimum hand height is assumed to be 8cm. 
    */
   private static final int HAND_MIN_HEIGHT_SCALE = 13;
-  private static final int ARM_JOINT_HEIGHT_SCALE = 10;
+  private static final int ARM_JOINT_HEIGHT_SCALE = 13;
 
   private static final int FORELIMB_BOTTOM_TO_IMAGE_BOTTOM_DIST_THRESH = 10;
   
