@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.j3d.LinearFog;
+import javax.vecmath.Point2f;
 import javax.vecmath.Point3f;
 
 import org.OpenNI.Point3D;
@@ -44,7 +45,7 @@ public class DiecticGestureHandler {
    * Right arm adjustment
    */
   private final boolean RIGHT_ARM_ADJUSTMENT = true;
-  private final float RIGHT_ARM_ADJUSTMENT_RATIO = 0.2f;
+  private final float RIGHT_ARM_ADJUSTMENT_ANGLE_DEGREES = 10;
   
   /**
    * Must be at least 2.
@@ -110,15 +111,23 @@ public class DiecticGestureHandler {
     fingertip = filteredFingertip.getFilteredPoints()[0];
     armJoint = filteredArmjoint.getFilteredPoints()[0];
     
-    if (RIGHT_ARM_ADJUSTMENT) {
-      float xdiff = (fingertip.x - armJoint.x);
-      float ydiff = (fingertip.y - armJoint.y);
-      float armLength = (float) Math.sqrt( xdiff * xdiff + ydiff * ydiff);
-      armJoint.x -= RIGHT_ARM_ADJUSTMENT_RATIO * armLength;
-    }
+
     
     // Find the subsampeled arm line.
     Point3f subsampledLinePoints[] = computeSubsampledLine(fingertip, armJoint, packet);
+    
+    if (RIGHT_ARM_ADJUSTMENT) {
+      // Rotate the arm joint around the finger.
+      Point2f fingerP = new Point2f(subsampledLinePoints[0].x, subsampledLinePoints[0].y);
+      Point2f armP = new Point2f(subsampledLinePoints[1].x, subsampledLinePoints[1].y);
+      armP.sub(fingerP);
+      float angleRad = (float) Math.toRadians(RIGHT_ARM_ADJUSTMENT_ANGLE_DEGREES);
+      float xPrime = (float) (armP.x * Math.cos(angleRad)  - armP.y * Math.sin(angleRad));
+      float yPrime = (float) (armP.x * Math.sin(angleRad) + armP.y * Math.cos(angleRad));
+      subsampledLinePoints[1].x = fingerP.x + xPrime;
+      subsampledLinePoints[1].y = fingerP.y + yPrime;
+    }
+    
     Point3f p = Geometry.linePlaneIntersection(subsampledLinePoints[0], 
         subsampledLinePoints[1], 
         is.center().value(), is.surfaceNormal());
