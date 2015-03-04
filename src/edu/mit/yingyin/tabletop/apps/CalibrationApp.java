@@ -350,8 +350,12 @@ public class CalibrationApp extends KeyAdapter {
       LOGGER.warning("No test data.");
     }
     
-    if (fullSavePath != null)
+    if (fullSavePath != null) {
+    	LOGGER.info("Saving callibriation to: " + fullSavePath);
       example.save(fullSavePath);
+    } else {
+    	LOGGER.severe("NO SAVE PATH SO NO SAVING");
+    }
     example.release();
   }
 }
